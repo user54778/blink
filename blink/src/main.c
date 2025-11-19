@@ -1,7 +1,11 @@
+#include "stm32f070xb.h"
 #include "stm32f0xx_hal.h"
+#include "stm32f0xx_hal_gpio.h"
+#include "stm32f0xx_hal_rcc.h"
 
 void SystemClockConfig(void);
 void ErrorHandler(void);
+// static void initGPIO(void);
 
 int main() {
   // Initialize HAL; reset peripherals, init flash interface and systick
@@ -12,10 +16,70 @@ int main() {
 
   // init peripherals here
   // we need to a) init gpio ports, b) configure LD2 LED
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
-  while (1) {
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+  // initGPIO();
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  volatile int j = 0;
+  while (j < 100) {
+    /*
+    GPIOA->ODR |= (1 << 2);
+    HAL_Delay(500);
+    GPIOA->ODR &= ~(1 << 2);
+    */
+    // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    // HAL_Delay(500);
+    // __IO uint32_t ODR;/*!< GPIO port output data register,
+    // Address offset: 0x14 */
+    // turn pin LD3 (PA5, or GPIO_PIN_5) ON
+    // GPIOA->BSRR = (1 << 5);
+    GPIOA->ODR |= (1 << 5);
+    // HAL_Delay(2000);
+    for (volatile int i = 0; i < 500000; i++)
+      __asm__("nop");
+
+    // GPIOA->BSRR = ~(1 << 5);
+    // GPIOA->BSRR = (1 << (5 + 16));
+    GPIOA->ODR &= ~(1 << 5);
+    for (volatile int i = 0; i < 500000; i++)
+      __asm__("nop");
+    // HAL_Delay(2000);
+    j++;
   }
 }
+
+/*
+static void initGPIO() {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  // enable each GPIO clock
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  // why does it writepin first?
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+  GPIO_InitStruct.Pin = B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = LD2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; // ?
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+}
+*/
 
 //
 void SystemClockConfig() {
