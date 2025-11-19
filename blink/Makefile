@@ -68,7 +68,7 @@ ALL_OBJS = $(ASM_OBJS) $(CXX_OBJS)
 all: $(TARGET)
 
 # Compile
-$(CXX_OBJS): %.o: %.c
+$(CXX_OBJS): %.o: %.c 
 $(ASM_OBJS): %.o: %.s
 $(ALL_OBJS):
 	@echo "[CC] $@"
@@ -81,7 +81,7 @@ $(ALL_OBJS):
 
 # Clean
 clean:
-	@rm -f $(ALL_OBJS) $(TARGET)
+	@rm -f $(ALL_OBJS) $(TARGET) *.bin
 
 # Debug
 gdb-server_stlink:
